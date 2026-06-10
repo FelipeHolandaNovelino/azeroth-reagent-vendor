@@ -9,73 +9,32 @@ import {
   type RecipeStatusFilter,
 } from "@/components/RecipeFilters";
 import { RecipesResult } from "@/components/RecipesResult";
-import { mockInventory, mockRecipes } from "@/data/mockCraftingData";
+import { mockRecipes } from "@/data/mockCraftingData";
+import { useInventory } from "@/hooks/useInventory";
 import { calculateCraftOptions } from "@/lib/crafting/calculateCraftOptions";
 import type { InventoryItem } from "@/types/crafting";
 
 type ReagentCatalogItem = Pick<InventoryItem, "itemId" | "name">;
 
-const INVENTORY_STORAGE_KEY = "azeroth-reagent-vendor:inventory";
-
-function loadStoredInventory(): InventoryItem[] {
-  try {
-    const storedInventory = window.localStorage.getItem(INVENTORY_STORAGE_KEY);
-
-    if (!storedInventory) {
-      return mockInventory;
-    }
-
-    const parsedInventory = JSON.parse(storedInventory);
-
-    if (!Array.isArray(parsedInventory)) {
-      return mockInventory;
-    }
-
-    // Garante que dados salvos no navegador tenham o formato mínimo esperado.
-    return parsedInventory.filter((item): item is InventoryItem => {
-      return (
-        typeof item?.itemId === "string" &&
-        typeof item?.name === "string" &&
-        typeof item?.quantity === "number"
-      );
-    });
-  } catch {
-    // Em caso de JSON inválido ou bloqueio do localStorage, o app continua funcional.
-    return mockInventory;
-  }
-}
-
 export function CraftingDashboard() {
-  const [inventory, setInventory] = useState<InventoryItem[]>(mockInventory);
-  const [hasLoadedStoredInventory, setHasLoadedStoredInventory] =
-    useState(false);
+  const {
+    inventory,
+    updateInventoryQuantity,
+    addInventoryItem,
+    removeInventoryItem,
+    resetInventory,
+  } = useInventory();
+
   const [selectedReagentId, setSelectedReagentId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] =
     useState<RecipeStatusFilter>("all");
   const [selectedProfession, setSelectedProfession] = useState("all");
 
-  useEffect(() => {
-    setInventory(loadStoredInventory());
-    setHasLoadedStoredInventory(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasLoadedStoredInventory) {
-      return;
-    }
-
-    // Persiste o inventário sempre que o jogador adiciona, remove ou altera quantidades.
-    window.localStorage.setItem(
-      INVENTORY_STORAGE_KEY,
-      JSON.stringify(inventory)
-    );
-  }, [hasLoadedStoredInventory, inventory]);
-
   const reagentCatalog = useMemo<ReagentCatalogItem[]>(() => {
     const reagentsMap = new Map<string, ReagentCatalogItem>();
 
-    // Monta um catálogo único a partir dos reagentes usados nas receitas mockadas.
+    // Cria um catálogo único a partir dos reagentes usados nas receitas disponíveis.
     mockRecipes.forEach((recipe) => {
       recipe.reagents.forEach((reagent) => {
         reagentsMap.set(reagent.itemId, {
@@ -146,7 +105,7 @@ export function CraftingDashboard() {
   }, [craftOptions, searchTerm, selectedProfession, selectedStatus]);
 
   const professions = useMemo(() => {
-    // Mantém a lista de profissões única e ordenada para alimentar o select de filtros.
+    // Mantém a lista de profissões única e ordenada para alimentar o filtro.
     return Array.from(
       new Set(craftOptions.map((craftOption) => craftOption.profession))
     ).sort((firstProfession, secondProfession) =>
@@ -162,24 +121,6 @@ export function CraftingDashboard() {
     (option) => option.status === "almost"
   ).length;
 
-  function handleInventoryQuantityChange(itemId: string, quantity: number) {
-    const safeQuantity = Math.max(quantity, 0);
-
-    // Mantém o inventário imutável para garantir uma atualização previsível do React.
-    setInventory((currentInventory) =>
-      currentInventory.map((item) => {
-        if (item.itemId !== itemId) {
-          return item;
-        }
-
-        return {
-          ...item,
-          quantity: safeQuantity,
-        };
-      })
-    );
-  }
-
   function handleAddInventoryItem() {
     const selectedReagent = reagentCatalog.find(
       (reagent) => reagent.itemId === selectedReagentId
@@ -189,26 +130,12 @@ export function CraftingDashboard() {
       return;
     }
 
-    // Novo reagente começa com quantidade 1 para já participar do cálculo.
-    setInventory((currentInventory) => [
-      ...currentInventory,
-      {
-        itemId: selectedReagent.itemId,
-        name: selectedReagent.name,
-        quantity: 1,
-      },
-    ]);
-  }
-
-  function handleRemoveInventoryItem(itemId: string) {
-    setInventory((currentInventory) =>
-      currentInventory.filter((item) => item.itemId !== itemId)
-    );
-  }
-
-  function handleResetInventory() {
-    // Restaura os dados fictícios e deixa o localStorage sincronizado pelo efeito de persistência.
-    setInventory(mockInventory);
+    // Novo reagente começa com 1 unidade para participar imediatamente dos cálculos.
+    addInventoryItem({
+      itemId: selectedReagent.itemId,
+      name: selectedReagent.name,
+      quantity: 1,
+    });
   }
 
   function handleClearFilters() {
@@ -231,9 +158,9 @@ export function CraftingDashboard() {
           selectedReagentId={selectedReagentId}
           onSelectedReagentChange={setSelectedReagentId}
           onAddInventoryItem={handleAddInventoryItem}
-          onQuantityChange={handleInventoryQuantityChange}
-          onRemoveInventoryItem={handleRemoveInventoryItem}
-          onResetInventory={handleResetInventory}
+          onQuantityChange={updateInventoryQuantity}
+          onRemoveInventoryItem={removeInventoryItem}
+          onResetInventory={resetInventory}
         />
 
         <RecipeFilters
