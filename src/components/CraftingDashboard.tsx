@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { CraftSummary } from "@/components/CraftSummary";
 import { InventoryGrid } from "@/components/InventoryGrid";
@@ -13,12 +13,58 @@ import { mockInventory, mockRecipes } from "@/data/mockCraftingData";
 import { calculateCraftOptions } from "@/lib/crafting/calculateCraftOptions";
 import type { InventoryItem } from "@/types/crafting";
 
+type ReagentCatalogItem = Pick<InventoryItem, "itemId" | "name">;
+
 export function CraftingDashboard() {
   const [inventory, setInventory] = useState<InventoryItem[]>(mockInventory);
+  const [selectedReagentId, setSelectedReagentId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] =
     useState<RecipeStatusFilter>("all");
   const [selectedProfession, setSelectedProfession] = useState("all");
+
+  const reagentCatalog = useMemo<ReagentCatalogItem[]>(() => {
+    const reagentsMap = new Map<string, ReagentCatalogItem>();
+
+    // Monta um catálogo único a partir dos reagentes usados nas receitas mockadas.
+    mockRecipes.forEach((recipe) => {
+      recipe.reagents.forEach((reagent) => {
+        reagentsMap.set(reagent.itemId, {
+          itemId: reagent.itemId,
+          name: reagent.name,
+        });
+      });
+    });
+
+    return Array.from(reagentsMap.values()).sort((firstReagent, secondReagent) =>
+      firstReagent.name.localeCompare(secondReagent.name)
+    );
+  }, []);
+
+  const addableReagents = useMemo(() => {
+    const currentInventoryIds = new Set(
+      inventory.map((item) => item.itemId)
+    );
+
+    return reagentCatalog.filter(
+      (reagent) => !currentInventoryIds.has(reagent.itemId)
+    );
+  }, [inventory, reagentCatalog]);
+
+  useEffect(() => {
+    if (addableReagents.length === 0) {
+      setSelectedReagentId("");
+      return;
+    }
+
+    const selectedReagentStillAvailable = addableReagents.some(
+      (reagent) => reagent.itemId === selectedReagentId
+    );
+
+    if (!selectedReagentStillAvailable) {
+      setSelectedReagentId(addableReagents[0].itemId);
+    }
+  }, [addableReagents, selectedReagentId]);
 
   const craftOptions = useMemo(() => {
     return calculateCraftOptions(inventory, mockRecipes);
@@ -32,7 +78,9 @@ export function CraftingDashboard() {
         normalizedSearchTerm.length === 0 ||
         craftOption.recipeName.toLowerCase().includes(normalizedSearchTerm) ||
         craftOption.profession.toLowerCase().includes(normalizedSearchTerm) ||
-        craftOption.craftedItemType.toLowerCase().includes(normalizedSearchTerm) ||
+        craftOption.craftedItemType
+          .toLowerCase()
+          .includes(normalizedSearchTerm) ||
         craftOption.reagents.some((reagent) =>
           reagent.name.toLowerCase().includes(normalizedSearchTerm)
         );
@@ -83,6 +131,32 @@ export function CraftingDashboard() {
     );
   }
 
+  function handleAddInventoryItem() {
+    const selectedReagent = reagentCatalog.find(
+      (reagent) => reagent.itemId === selectedReagentId
+    );
+
+    if (!selectedReagent) {
+      return;
+    }
+
+    // Novo reagente começa com quantidade 1 para já participar do cálculo.
+    setInventory((currentInventory) => [
+      ...currentInventory,
+      {
+        itemId: selectedReagent.itemId,
+        name: selectedReagent.name,
+        quantity: 1,
+      },
+    ]);
+  }
+
+  function handleRemoveInventoryItem(itemId: string) {
+    setInventory((currentInventory) =>
+      currentInventory.filter((item) => item.itemId !== itemId)
+    );
+  }
+
   function handleResetInventory() {
     // Restaura os dados fictícios para facilitar testes durante o desenvolvimento.
     setInventory(mockInventory);
@@ -104,7 +178,12 @@ export function CraftingDashboard() {
 
         <InventoryGrid
           items={inventory}
+          addableReagents={addableReagents}
+          selectedReagentId={selectedReagentId}
+          onSelectedReagentChange={setSelectedReagentId}
+          onAddInventoryItem={handleAddInventoryItem}
           onQuantityChange={handleInventoryQuantityChange}
+          onRemoveInventoryItem={handleRemoveInventoryItem}
           onResetInventory={handleResetInventory}
         />
 
