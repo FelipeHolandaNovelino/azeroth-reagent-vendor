@@ -15,13 +15,62 @@ import type { InventoryItem } from "@/types/crafting";
 
 type ReagentCatalogItem = Pick<InventoryItem, "itemId" | "name">;
 
+const INVENTORY_STORAGE_KEY = "azeroth-reagent-vendor:inventory";
+
+function loadStoredInventory(): InventoryItem[] {
+  try {
+    const storedInventory = window.localStorage.getItem(INVENTORY_STORAGE_KEY);
+
+    if (!storedInventory) {
+      return mockInventory;
+    }
+
+    const parsedInventory = JSON.parse(storedInventory);
+
+    if (!Array.isArray(parsedInventory)) {
+      return mockInventory;
+    }
+
+    // Garante que dados salvos no navegador tenham o formato mínimo esperado.
+    return parsedInventory.filter((item): item is InventoryItem => {
+      return (
+        typeof item?.itemId === "string" &&
+        typeof item?.name === "string" &&
+        typeof item?.quantity === "number"
+      );
+    });
+  } catch {
+    // Em caso de JSON inválido ou bloqueio do localStorage, o app continua funcional.
+    return mockInventory;
+  }
+}
+
 export function CraftingDashboard() {
   const [inventory, setInventory] = useState<InventoryItem[]>(mockInventory);
+  const [hasLoadedStoredInventory, setHasLoadedStoredInventory] =
+    useState(false);
   const [selectedReagentId, setSelectedReagentId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] =
     useState<RecipeStatusFilter>("all");
   const [selectedProfession, setSelectedProfession] = useState("all");
+
+  useEffect(() => {
+    setInventory(loadStoredInventory());
+    setHasLoadedStoredInventory(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedStoredInventory) {
+      return;
+    }
+
+    // Persiste o inventário sempre que o jogador adiciona, remove ou altera quantidades.
+    window.localStorage.setItem(
+      INVENTORY_STORAGE_KEY,
+      JSON.stringify(inventory)
+    );
+  }, [hasLoadedStoredInventory, inventory]);
 
   const reagentCatalog = useMemo<ReagentCatalogItem[]>(() => {
     const reagentsMap = new Map<string, ReagentCatalogItem>();
@@ -158,7 +207,7 @@ export function CraftingDashboard() {
   }
 
   function handleResetInventory() {
-    // Restaura os dados fictícios para facilitar testes durante o desenvolvimento.
+    // Restaura os dados fictícios e deixa o localStorage sincronizado pelo efeito de persistência.
     setInventory(mockInventory);
   }
 
