@@ -3,6 +3,7 @@ import type {
   InventoryItem,
   MissingReagent,
   Recipe,
+  RecipeReagentAvailability,
   RecipeStatus,
 } from "@/types/crafting";
 
@@ -57,24 +58,37 @@ function calculateMaxCrafts(
   return Math.min(...craftLimits);
 }
 
-function getMissingReagents(
+function getRecipeReagentsAvailability(
   recipe: Recipe,
   inventoryMap: Map<string, InventoryItem>
-): MissingReagent[] {
-  return recipe.reagents
-    .map((reagent) => {
-      const ownedQuantity = inventoryMap.get(reagent.itemId)?.quantity ?? 0;
-      const missingQuantity = Math.max(reagent.quantity - ownedQuantity, 0);
+): RecipeReagentAvailability[] {
+  return recipe.reagents.map((reagent) => {
+    const ownedQuantity = inventoryMap.get(reagent.itemId)?.quantity ?? 0;
+    const missingQuantity = Math.max(reagent.quantity - ownedQuantity, 0);
 
+    return {
+      ...reagent,
+      ownedQuantity,
+      missingQuantity,
+      isAvailable: missingQuantity === 0,
+    };
+  });
+}
+
+function getMissingReagents(
+  reagentsAvailability: RecipeReagentAvailability[]
+): MissingReagent[] {
+  return reagentsAvailability
+    .filter((reagent) => reagent.missingQuantity > 0)
+    .map((reagent) => {
       return {
         itemId: reagent.itemId,
         name: reagent.name,
         requiredQuantity: reagent.quantity,
-        ownedQuantity,
-        missingQuantity,
+        ownedQuantity: reagent.ownedQuantity,
+        missingQuantity: reagent.missingQuantity,
       };
-    })
-    .filter((reagent) => reagent.missingQuantity > 0);
+    });
 }
 
 function getStatusPriority(status: RecipeStatus): number {
@@ -91,12 +105,16 @@ export function calculateCraftOptions(
   inventory: InventoryItem[],
   recipes: Recipe[]
 ): CraftOption[] {
-  const inventoryMap = new Map(
-    inventory.map((item) => [item.itemId, item])
-  );
+  const inventoryMap = new Map(inventory.map((item) => [item.itemId, item]));
 
   const craftOptions = recipes.map((recipe) => {
-    const missingReagents = getMissingReagents(recipe, inventoryMap);
+    const reagentsAvailability = getRecipeReagentsAvailability(
+      recipe,
+      inventoryMap
+    );
+
+    const missingReagents = getMissingReagents(reagentsAvailability);
+
     const completionPercentage = calculateCompletionPercentage(
       recipe,
       inventoryMap
@@ -115,12 +133,12 @@ export function calculateCraftOptions(
       status,
       maxCrafts,
       completionPercentage,
-      reagents: recipe.reagents,
+      reagents: reagentsAvailability,
       missingReagents,
     };
   });
 
-  // Ordena primeiro receitas craftáveis, depois quase craftáveis e, por fim, indisponíveis.
+  // Mantém os resultados mais úteis no topo: craftáveis, quase craftáveis e indisponíveis.
   return craftOptions.sort((firstRecipe, secondRecipe) => {
     const statusDifference =
       getStatusPriority(firstRecipe.status) -

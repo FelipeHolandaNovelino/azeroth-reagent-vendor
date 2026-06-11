@@ -70,39 +70,66 @@ export function RecipeCard({ craftOption }: RecipeCardProps) {
           {craftOption.reagents.map((reagent) => (
             <li
               key={reagent.itemId}
-              className="flex items-center justify-between rounded-xl bg-black/20 px-3 py-2 text-sm"
+              className="rounded-xl bg-black/20 px-3 py-3 text-sm"
             >
-              <span>{reagent.name}</span>
-              <span className="font-semibold">{reagent.quantity}</span>
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-medium text-white">{reagent.name}</span>
+
+                <span
+                  className={`rounded-full px-2 py-1 text-xs font-bold ${
+                    reagent.isAvailable
+                      ? "bg-emerald-400/15 text-emerald-200"
+                      : "bg-red-400/15 text-red-200"
+                  }`}
+                >
+                  {reagent.ownedQuantity}/{reagent.quantity}
+                </span>
+              </div>
+
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-white"
+                  style={{
+                    width: `${Math.min(
+                      (reagent.ownedQuantity / reagent.quantity) * 100,
+                      100
+                    )}%`,
+                  }}
+                />
+              </div>
+
+              <p className="mt-2 text-xs text-slate-400">
+                Requer {reagent.quantity}. Você possui{" "}
+                {reagent.ownedQuantity}.
+              </p>
+
+              {!reagent.isAvailable && (
+                <p className="mt-1 text-xs font-semibold text-red-200">
+                  Faltam {reagent.missingQuantity}.
+                </p>
+              )}
             </li>
           ))}
         </ul>
       </div>
 
       {craftOption.missingReagents.length > 0 && (
-        <div className="mt-5">
+        <div className="mt-5 rounded-xl border border-white/10 bg-black/20 p-3">
           <h3 className="text-sm font-semibold text-white">
-            Reagentes faltantes
+            Resumo dos faltantes
           </h3>
 
           <ul className="mt-3 space-y-2">
             {craftOption.missingReagents.map((reagent) => (
               <li
                 key={reagent.itemId}
-                className="rounded-xl bg-black/20 px-3 py-2 text-sm"
+                className="flex items-center justify-between gap-3 text-sm"
               >
-                <div className="flex items-center justify-between">
-                  <span>{reagent.name}</span>
+                <span>{reagent.name}</span>
 
-                  <span className="font-semibold">
-                    falta {reagent.missingQuantity}
-                  </span>
-                </div>
-
-                <p className="mt-1 text-xs text-slate-400">
-                  Possui {reagent.ownedQuantity} de{" "}
-                  {reagent.requiredQuantity} necessários.
-                </p>
+                <span className="font-semibold text-red-200">
+                  falta {reagent.missingQuantity}
+                </span>
               </li>
             ))}
           </ul>

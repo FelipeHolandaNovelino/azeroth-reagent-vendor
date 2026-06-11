@@ -1,5 +1,7 @@
 export type RecipeStatus = "craftable" | "almost" | "unavailable";
 
+export type RecipeStatusFilter = RecipeStatus | "all";
+
 export type InventoryItem = {
   itemId: string;
   name: string;
@@ -10,6 +12,12 @@ export type ReagentRequirement = {
   itemId: string;
   name: string;
   quantity: number;
+};
+
+export type RecipeReagentAvailability = ReagentRequirement & {
+  ownedQuantity: number;
+  missingQuantity: number;
+  isAvailable: boolean;
 };
 
 export type Recipe = {
@@ -36,6 +44,6 @@ export type CraftOption = {
   status: RecipeStatus;
   maxCrafts: number;
   completionPercentage: number;
-  reagents: ReagentRequirement[];
+  reagents: RecipeReagentAvailability[];
   missingReagents: MissingReagent[];
 };
