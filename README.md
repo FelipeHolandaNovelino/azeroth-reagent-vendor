@@ -10,6 +10,14 @@ Acesse o projeto publicado:
 
 https://azeroth-reagent-vendor.vercel.app/
 
+## Versão atual
+
+**v1.0.0** — Primeira versão funcional publicada.
+
+Esta versão inclui a base principal do produto: inventário editável, cálculo de receitas, filtros, persistência local, importação/exportação em JSON, rota interna para receitas e testes unitários para a regra central de crafting.
+
+A release está disponível na aba **Releases** do repositório.
+
 ## Sobre o projeto
 
 Jogadores de World of Warcraft acumulam diversos reagentes durante a gameplay, mas nem sempre sabem quais itens podem ser produzidos com esses materiais.
@@ -30,6 +38,8 @@ Esta primeira versão utiliza dados mockados para validar a lógica principal do
 * Filtros por busca, status e profissão.
 * Persistência do inventário com `localStorage`.
 * Importação e exportação de inventário em JSON.
+* Carregamento de receitas por rota interna do Next.js.
+* Testes unitários para a lógica principal de crafting.
 * Interface responsiva com identidade visual inspirada em fantasia e crafting.
 
 ## Tecnologias utilizadas
@@ -39,6 +49,7 @@ Esta primeira versão utiliza dados mockados para validar a lógica principal do
 * TypeScript
 * Tailwind CSS
 * React Hooks
+* Vitest
 * localStorage
 * Vercel
 
@@ -51,6 +62,8 @@ Esta primeira versão utiliza dados mockados para validar a lógica principal do
 * Manipulação de estado.
 * Persistência local de dados.
 * Filtros dinâmicos.
+* Rotas internas com Next.js.
+* Testes unitários com Vitest.
 * Regras de negócio aplicadas no frontend.
 * Organização de projeto com foco em escalabilidade.
 
@@ -59,6 +72,10 @@ Esta primeira versão utiliza dados mockados para validar a lógica principal do
 ```txt
 src/
 ├── app/
+│   ├── api/
+│   │   └── crafting/
+│   │       └── recipes/
+│   │           └── route.ts
 │   └── page.tsx
 ├── components/
 │   ├── CraftingDashboard.tsx
@@ -76,7 +93,12 @@ src/
 │   └── useInventory.ts
 ├── lib/
 │   └── crafting/
+│       ├── __tests__/
+│       │   └── calculateCraftOptions.test.ts
 │       └── calculateCraftOptions.ts
+├── services/
+│   ├── craftingApiClient.ts
+│   └── craftingDataService.ts
 └── types/
     └── crafting.ts
 ```
@@ -113,6 +135,32 @@ Acesse no navegador:
 http://localhost:3000
 ```
 
+## Scripts disponíveis
+
+```bash
+npm run dev
+```
+
+Inicia o projeto em modo de desenvolvimento.
+
+```bash
+npm run build
+```
+
+Gera a versão de produção.
+
+```bash
+npm run test:run
+```
+
+Executa os testes unitários.
+
+```bash
+npm run check
+```
+
+Executa testes e build em sequência para validar o projeto antes de um push importante.
+
 ## Como funciona a lógica de crafting
 
 O sistema compara os reagentes disponíveis no inventário com os reagentes exigidos em cada receita.
@@ -133,30 +181,11 @@ Quase craftável
 Indisponível
 ```
 
-## Exemplo de uso
+## Dados mockados
 
-Inventário informado:
+Esta versão utiliza dados fictícios para validar a lógica principal do produto.
 
-```txt
-Barra de Cobalto: 10
-Couro Pesado: 5
-```
-
-Receita analisada:
-
-```txt
-Espada Grande de Cobalto
-Requer:
-- 5 Barras de Cobalto
-- 2 Couros Pesados
-```
-
-Resultado:
-
-```txt
-Status: Craftável agora
-Quantidade possível: 2 unidades
-```
+A estrutura foi pensada para permitir uma evolução futura com dados reais vindos da Blizzard API ou de uma base própria de receitas.
 
 ## Próximas melhorias
 
@@ -172,4 +201,4 @@ Quantidade possível: 2 unidades
 
 Projeto publicado e funcional como primeira versão de portfólio.
 
-A aplicação ainda utiliza dados fictícios, mas já possui a base de interface, regras de negócio, persistência local e estrutura preparada para evoluções futuras.
+A aplicação ainda utiliza dados fictícios, mas já possui a base de interface, regras de negócio, persistência local, rota interna, testes unitários e estrutura preparada para evoluções futuras.
