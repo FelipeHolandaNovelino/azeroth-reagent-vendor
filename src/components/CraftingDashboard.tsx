@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { CraftSummary } from "@/components/CraftSummary";
+import { CraftingFlow } from "@/components/CraftingFlow";
 import { InventoryGrid } from "@/components/InventoryGrid";
 import { InventoryImportExport } from "@/components/InventoryImportExport";
 import { RecipeFilters } from "@/components/RecipeFilters";
@@ -42,9 +43,10 @@ export function CraftingDashboard() {
       inventory.map((item) => item.itemId)
     );
 
-    return reagentCatalog.filter(
-      (reagent) => !currentInventoryIds.has(reagent.itemId)
-    );
+    // Lista apenas reagentes usados por receitas e que ainda não estão no inventário.
+    return reagentCatalog.filter((reagent) => {
+      return !currentInventoryIds.has(reagent.itemId);
+    });
   }, [inventory, reagentCatalog]);
 
   useEffect(() => {
@@ -86,6 +88,8 @@ export function CraftingDashboard() {
           craftableCount={craftableCount}
           almostCraftableCount={almostCraftableCount}
         />
+
+        <CraftingFlow />
 
         <InventoryGrid
           items={inventory}
