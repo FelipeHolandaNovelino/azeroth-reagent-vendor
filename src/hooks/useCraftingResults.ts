@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import { mockRecipes } from "@/data/mockCraftingData";
 import { calculateCraftOptions } from "@/lib/crafting/calculateCraftOptions";
+import { getAvailableRecipes } from "@/services/craftingDataService";
 import type {
   InventoryItem,
   RecipeStatusFilter,
@@ -17,9 +17,14 @@ export function useCraftingResults(inventory: InventoryItem[]) {
     useState<RecipeStatusFilter>("all");
   const [selectedProfession, setSelectedProfession] = useState("all");
 
+  const availableRecipes = useMemo(() => {
+    // Mantém a origem das receitas isolada para permitir futura integração com API externa.
+    return getAvailableRecipes();
+  }, []);
+
   const craftOptions = useMemo(() => {
-    return calculateCraftOptions(inventory, mockRecipes);
-  }, [inventory]);
+    return calculateCraftOptions(inventory, availableRecipes);
+  }, [inventory, availableRecipes]);
 
   const filteredCraftOptions = useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase();
@@ -60,7 +65,7 @@ export function useCraftingResults(inventory: InventoryItem[]) {
     const reagentsMap = new Map<string, ReagentCatalogItem>();
 
     // O catálogo nasce das receitas disponíveis para garantir que só reagentes úteis sejam adicionados.
-    mockRecipes.forEach((recipe) => {
+    availableRecipes.forEach((recipe) => {
       recipe.reagents.forEach((reagent) => {
         reagentsMap.set(reagent.itemId, {
           itemId: reagent.itemId,
@@ -72,7 +77,7 @@ export function useCraftingResults(inventory: InventoryItem[]) {
     return Array.from(reagentsMap.values()).sort((firstReagent, secondReagent) =>
       firstReagent.name.localeCompare(secondReagent.name)
     );
-  }, []);
+  }, [availableRecipes]);
 
   const craftableCount = useMemo(() => {
     return craftOptions.filter((option) => option.status === "craftable")
