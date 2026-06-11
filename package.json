@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "check": "npm run test:run && npm run build",
     "test": "vitest",
   "test:run": "vitest run",
     "dev": "next dev",
