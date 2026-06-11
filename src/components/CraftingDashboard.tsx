@@ -33,6 +33,8 @@ export function CraftingDashboard() {
     reagentCatalog,
     craftableCount,
     almostCraftableCount,
+    isLoadingRecipes,
+    recipesError,
     setSearchTerm,
     setSelectedStatus,
     setSelectedProfession,
@@ -129,7 +131,11 @@ export function CraftingDashboard() {
           onClearFilters={clearFilters}
         />
 
-        <RecipesResult craftOptions={filteredCraftOptions} />
+        <RecipesResult
+          craftOptions={filteredCraftOptions}
+          isLoading={isLoadingRecipes}
+          errorMessage={recipesError}
+        />
       </section>
     </main>
   );

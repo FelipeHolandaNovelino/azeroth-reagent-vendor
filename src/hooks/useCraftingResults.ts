@@ -1,25 +1,60 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { calculateCraftOptions } from "@/lib/crafting/calculateCraftOptions";
-import { getAvailableRecipes } from "@/services/craftingDataService";
+import { fetchAvailableRecipes } from "@/services/craftingApiClient";
 import type {
   InventoryItem,
+  Recipe,
   RecipeStatusFilter,
 } from "@/types/crafting";
 
 export type ReagentCatalogItem = Pick<InventoryItem, "itemId" | "name">;
 
 export function useCraftingResults(inventory: InventoryItem[]) {
+  const [availableRecipes, setAvailableRecipes] = useState<Recipe[]>([]);
+  const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
+  const [recipesError, setRecipesError] = useState<string | null>(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] =
     useState<RecipeStatusFilter>("all");
   const [selectedProfession, setSelectedProfession] = useState("all");
 
-  const availableRecipes = useMemo(() => {
-    // Mantém a origem das receitas isolada para permitir futura integração com API externa.
-    return getAvailableRecipes();
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadRecipes() {
+      try {
+        setIsLoadingRecipes(true);
+        setRecipesError(null);
+
+        const recipes = await fetchAvailableRecipes();
+
+        if (isMounted) {
+          setAvailableRecipes(recipes);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setRecipesError(
+            error instanceof Error
+              ? error.message
+              : "Não foi possível carregar as receitas."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingRecipes(false);
+        }
+      }
+    }
+
+    loadRecipes();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const craftOptions = useMemo(() => {
@@ -104,6 +139,8 @@ export function useCraftingResults(inventory: InventoryItem[]) {
     reagentCatalog,
     craftableCount,
     almostCraftableCount,
+    isLoadingRecipes,
+    recipesError,
     setSearchTerm,
     setSelectedStatus,
     setSelectedProfession,
