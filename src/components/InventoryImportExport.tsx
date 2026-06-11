@@ -116,18 +116,18 @@ export function InventoryImportExport({
   }
 
   return (
-    <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+    <section className="rounded-3xl border border-[#8f6a34]/35 bg-[#24180f]/90 p-6 shadow-xl shadow-black/20">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#f0c86a]">
             Importação
           </p>
 
-          <h2 className="mt-1 text-xl font-bold text-white">
+          <h2 className="mt-1 text-xl font-bold text-[#fff4d6]">
             Importar ou exportar inventário
           </h2>
 
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[#dfcfac]/70">
             Use JSON para salvar, compartilhar ou simular uma futura importação
             gerada por AddOn.
           </p>
@@ -136,7 +136,7 @@ export function InventoryImportExport({
         <button
           type="button"
           onClick={() => setIsOpen((currentValue) => !currentValue)}
-          className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-amber-300 hover:text-amber-200"
+          className="rounded-xl border border-[#8f6a34]/40 bg-[#1b120b] px-4 py-2 text-sm font-semibold text-[#f3e7c3] transition hover:border-[#d4a64a] hover:text-[#f7d98d]"
         >
           {isOpen ? "Ocultar ferramentas" : "Mostrar ferramentas"}
         </button>
@@ -144,28 +144,28 @@ export function InventoryImportExport({
 
       {isOpen && (
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+          <div className="rounded-2xl border border-[#6f5330] bg-[#1b120b] p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="text-sm font-bold text-white">
+              <h3 className="text-sm font-bold text-[#fff4d6]">
                 Exportar inventário atual
               </h3>
 
               <button
                 type="button"
                 onClick={handleCopyInventory}
-                className="rounded-xl bg-amber-300 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-200"
+                className="rounded-xl bg-[#d4a64a] px-4 py-2 text-sm font-bold text-[#2b1b0d] transition hover:bg-[#e0b85e]"
               >
                 Copiar JSON
               </button>
             </div>
 
-            <pre className="mt-4 max-h-72 overflow-auto rounded-xl border border-slate-800 bg-slate-900 p-3 text-xs leading-5 text-slate-300">
+            <pre className="mt-4 max-h-72 overflow-auto rounded-xl border border-[#6f5330] bg-[#2a1b10] p-3 text-xs leading-5 text-[#f1e3bf]">
               {exportedInventory}
             </pre>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-            <h3 className="text-sm font-bold text-white">
+          <div className="rounded-2xl border border-[#6f5330] bg-[#1b120b] p-4">
+            <h3 className="text-sm font-bold text-[#fff4d6]">
               Importar inventário
             </h3>
 
@@ -173,13 +173,13 @@ export function InventoryImportExport({
               value={importValue}
               onChange={(event) => setImportValue(event.target.value)}
               placeholder='Cole aqui um JSON como: [{"itemId":"green-herb","name":"Erva Verde","quantity":100}]'
-              className="mt-4 min-h-72 w-full resize-y rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm leading-6 text-white outline-none transition placeholder:text-slate-500 focus:border-amber-300"
+              className="mt-4 min-h-72 w-full resize-y rounded-xl border border-[#7b5d35] bg-[#2a1b10] px-3 py-2 text-sm leading-6 text-[#fff4d6] outline-none transition placeholder:text-[#bca57c] focus:border-[#d4a64a]"
             />
 
             <button
               type="button"
               onClick={handleImportInventory}
-              className="mt-3 w-full rounded-xl bg-amber-300 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-200"
+              className="mt-3 w-full rounded-xl bg-[#d4a64a] px-4 py-2 text-sm font-bold text-[#2b1b0d] transition hover:bg-[#e0b85e]"
             >
               Importar JSON
             </button>
@@ -191,8 +191,8 @@ export function InventoryImportExport({
         <p
           className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
             feedbackMessage.type === "success"
-              ? "border-emerald-400/40 bg-emerald-950/30 text-emerald-100"
-              : "border-red-400/40 bg-red-950/30 text-red-100"
+              ? "border-emerald-400/30 bg-emerald-950/20 text-emerald-100"
+              : "border-red-400/30 bg-red-950/20 text-red-100"
           }`}
         >
           {feedbackMessage.text}

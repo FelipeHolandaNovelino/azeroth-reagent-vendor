@@ -8,66 +8,67 @@ export function CraftSummary({
   almostCraftableCount,
 }: CraftSummaryProps) {
   return (
-    <header className="overflow-hidden rounded-3xl border border-amber-300/20 bg-slate-900 shadow-2xl shadow-black/30">
+    <header className="overflow-hidden rounded-3xl border border-[#b8893c]/40 bg-[#24180f]/95 shadow-2xl shadow-black/30">
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-slate-900 to-indigo-950/70" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#7a5724]/35 via-[#24180f] to-[#2a1d13]/95" />
+        <div className="absolute right-10 top-10 h-36 w-36 rounded-full bg-[#d4a64a]/10 blur-3xl" />
+        <div className="absolute left-10 bottom-0 h-32 w-32 rounded-full bg-[#355c8c]/10 blur-3xl" />
 
         <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.35fr_0.65fr] lg:items-end">
           <div>
-            <div className="inline-flex rounded-full border border-amber-300/30 bg-amber-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-amber-200">
+            <div className="inline-flex rounded-full border border-[#d4a64a]/40 bg-[#d4a64a]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.25em] text-[#f5d88a]">
               Azeroth Reagent Vendor
             </div>
 
-            <h1 className="mt-5 max-w-4xl text-3xl font-black tracking-tight text-white sm:text-5xl">
-              Descubra o que craftar com os reagentes esquecidos na sua bag.
+            <h1 className="mt-5 max-w-4xl text-3xl font-black tracking-tight text-[#fff4d6] sm:text-5xl">
+              Transforme reagentes esquecidos em oportunidades de craft.
             </h1>
 
-            <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300">
-              Informe seus reagentes, analise receitas possíveis e veja o que
-              falta para transformar materiais soltos em itens úteis para sua
-              jornada em Azeroth.
+            <p className="mt-5 max-w-3xl text-base leading-7 text-[#e8d8b0]/85">
+              Informe os materiais da sua bag, descubra receitas possíveis e
+              veja quais reagentes faltam para completar seus próximos crafts.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <span className="rounded-full border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm font-semibold text-slate-200">
-                Consulta reversa de receitas
+              <span className="rounded-full border border-[#355c8c]/30 bg-[#1d2d43]/60 px-4 py-2 text-sm font-semibold text-[#d9e6f7]">
+                Consulta reversa
               </span>
 
-              <span className="rounded-full border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm font-semibold text-slate-200">
+              <span className="rounded-full border border-[#b8893c]/30 bg-[#4a3519]/40 px-4 py-2 text-sm font-semibold text-[#f4deb0]">
                 Inventário persistente
               </span>
 
-              <span className="rounded-full border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm font-semibold text-slate-200">
-                Preparado para importação por AddOn
+              <span className="rounded-full border border-[#8a6a3b]/30 bg-[#322216]/50 px-4 py-2 text-sm font-semibold text-[#ead7a9]">
+                Importação por JSON
               </span>
             </div>
           </div>
 
           <div className="grid gap-3">
-            <div className="rounded-2xl border border-emerald-300/20 bg-emerald-950/40 p-5">
-              <p className="text-sm font-medium text-emerald-200">
-                Receitas craftáveis agora
+            <div className="rounded-2xl border border-emerald-400/25 bg-emerald-950/20 p-5">
+              <p className="text-sm font-semibold text-emerald-200">
+                Craftáveis agora
               </p>
 
-              <strong className="mt-2 block text-4xl font-black text-white">
+              <strong className="mt-2 block text-4xl font-black text-[#fff4d6]">
                 {craftableCount}
               </strong>
 
               <p className="mt-2 text-xs leading-5 text-emerald-100/70">
-                Itens que já podem ser produzidos com o inventário atual.
+                Receitas prontas para produzir com o inventário atual.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-amber-300/20 bg-amber-950/40 p-5">
-              <p className="text-sm font-medium text-amber-200">
+            <div className="rounded-2xl border border-[#d4a64a]/30 bg-[#5a411b]/25 p-5">
+              <p className="text-sm font-semibold text-[#f3d48b]">
                 Quase prontas
               </p>
 
-              <strong className="mt-2 block text-4xl font-black text-white">
+              <strong className="mt-2 block text-4xl font-black text-[#fff4d6]">
                 {almostCraftableCount}
               </strong>
 
-              <p className="mt-2 text-xs leading-5 text-amber-100/70">
+              <p className="mt-2 text-xs leading-5 text-[#f2ddb2]/70">
                 Receitas próximas de ficarem disponíveis.
               </p>
             </div>
