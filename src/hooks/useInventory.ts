@@ -50,7 +50,7 @@ export function useInventory() {
       return;
     }
 
-    // Persiste qualquer alteração feita pelo jogador: adicionar, remover ou editar quantidade.
+    // Persiste qualquer alteração feita pelo jogador: adicionar, remover, importar ou editar quantidade.
     window.localStorage.setItem(
       INVENTORY_STORAGE_KEY,
       JSON.stringify(inventory)
@@ -94,6 +94,11 @@ export function useInventory() {
     );
   }
 
+  function replaceInventory(items: InventoryItem[]) {
+    // Substitui o inventário inteiro, usado principalmente no fluxo de importação por JSON.
+    setInventory(items);
+  }
+
   function resetInventory() {
     setInventory(mockInventory);
   }
@@ -103,6 +108,7 @@ export function useInventory() {
     updateInventoryQuantity,
     addInventoryItem,
     removeInventoryItem,
+    replaceInventory,
     resetInventory,
   };
 }

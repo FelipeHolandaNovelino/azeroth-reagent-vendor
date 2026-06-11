@@ -4,17 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 
 import { CraftSummary } from "@/components/CraftSummary";
 import { InventoryGrid } from "@/components/InventoryGrid";
-import {
-  RecipeFilters,
-  type RecipeStatusFilter,
-} from "@/components/RecipeFilters";
+import { InventoryImportExport } from "@/components/InventoryImportExport";
+import { RecipeFilters } from "@/components/RecipeFilters";
 import { RecipesResult } from "@/components/RecipesResult";
-import { mockRecipes } from "@/data/mockCraftingData";
+import { useCraftingResults } from "@/hooks/useCraftingResults";
 import { useInventory } from "@/hooks/useInventory";
-import { calculateCraftOptions } from "@/lib/crafting/calculateCraftOptions";
-import type { InventoryItem } from "@/types/crafting";
-
-type ReagentCatalogItem = Pick<InventoryItem, "itemId" | "name">;
 
 export function CraftingDashboard() {
   const {
@@ -22,32 +16,26 @@ export function CraftingDashboard() {
     updateInventoryQuantity,
     addInventoryItem,
     removeInventoryItem,
+    replaceInventory,
     resetInventory,
   } = useInventory();
 
+  const {
+    searchTerm,
+    selectedStatus,
+    selectedProfession,
+    filteredCraftOptions,
+    professions,
+    reagentCatalog,
+    craftableCount,
+    almostCraftableCount,
+    setSearchTerm,
+    setSelectedStatus,
+    setSelectedProfession,
+    clearFilters,
+  } = useCraftingResults(inventory);
+
   const [selectedReagentId, setSelectedReagentId] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] =
-    useState<RecipeStatusFilter>("all");
-  const [selectedProfession, setSelectedProfession] = useState("all");
-
-  const reagentCatalog = useMemo<ReagentCatalogItem[]>(() => {
-    const reagentsMap = new Map<string, ReagentCatalogItem>();
-
-    // Cria um catálogo único a partir dos reagentes usados nas receitas disponíveis.
-    mockRecipes.forEach((recipe) => {
-      recipe.reagents.forEach((reagent) => {
-        reagentsMap.set(reagent.itemId, {
-          itemId: reagent.itemId,
-          name: reagent.name,
-        });
-      });
-    });
-
-    return Array.from(reagentsMap.values()).sort((firstReagent, secondReagent) =>
-      firstReagent.name.localeCompare(secondReagent.name)
-    );
-  }, []);
 
   const addableReagents = useMemo(() => {
     const currentInventoryIds = new Set(
@@ -74,53 +62,6 @@ export function CraftingDashboard() {
     }
   }, [addableReagents, selectedReagentId]);
 
-  const craftOptions = useMemo(() => {
-    return calculateCraftOptions(inventory, mockRecipes);
-  }, [inventory]);
-
-  const filteredCraftOptions = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
-    return craftOptions.filter((craftOption) => {
-      const matchesSearchTerm =
-        normalizedSearchTerm.length === 0 ||
-        craftOption.recipeName.toLowerCase().includes(normalizedSearchTerm) ||
-        craftOption.profession.toLowerCase().includes(normalizedSearchTerm) ||
-        craftOption.craftedItemType
-          .toLowerCase()
-          .includes(normalizedSearchTerm) ||
-        craftOption.reagents.some((reagent) =>
-          reagent.name.toLowerCase().includes(normalizedSearchTerm)
-        );
-
-      const matchesStatus =
-        selectedStatus === "all" || craftOption.status === selectedStatus;
-
-      const matchesProfession =
-        selectedProfession === "all" ||
-        craftOption.profession === selectedProfession;
-
-      return matchesSearchTerm && matchesStatus && matchesProfession;
-    });
-  }, [craftOptions, searchTerm, selectedProfession, selectedStatus]);
-
-  const professions = useMemo(() => {
-    // Mantém a lista de profissões única e ordenada para alimentar o filtro.
-    return Array.from(
-      new Set(craftOptions.map((craftOption) => craftOption.profession))
-    ).sort((firstProfession, secondProfession) =>
-      firstProfession.localeCompare(secondProfession)
-    );
-  }, [craftOptions]);
-
-  const craftableCount = craftOptions.filter(
-    (option) => option.status === "craftable"
-  ).length;
-
-  const almostCraftableCount = craftOptions.filter(
-    (option) => option.status === "almost"
-  ).length;
-
   function handleAddInventoryItem() {
     const selectedReagent = reagentCatalog.find(
       (reagent) => reagent.itemId === selectedReagentId
@@ -136,12 +77,6 @@ export function CraftingDashboard() {
       name: selectedReagent.name,
       quantity: 1,
     });
-  }
-
-  function handleClearFilters() {
-    setSearchTerm("");
-    setSelectedStatus("all");
-    setSelectedProfession("all");
   }
 
   return (
@@ -163,6 +98,11 @@ export function CraftingDashboard() {
           onResetInventory={resetInventory}
         />
 
+        <InventoryImportExport
+          inventory={inventory}
+          onImportInventory={replaceInventory}
+        />
+
         <RecipeFilters
           searchTerm={searchTerm}
           selectedStatus={selectedStatus}
@@ -172,7 +112,7 @@ export function CraftingDashboard() {
           onSearchTermChange={setSearchTerm}
           onSelectedStatusChange={setSelectedStatus}
           onSelectedProfessionChange={setSelectedProfession}
-          onClearFilters={handleClearFilters}
+          onClearFilters={clearFilters}
         />
 
         <RecipesResult craftOptions={filteredCraftOptions} />
