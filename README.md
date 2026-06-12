@@ -24,7 +24,7 @@ Jogadores de World of Warcraft acumulam diversos reagentes durante a gameplay, m
 
 O **Azeroth Reagent Vendor** resolve esse problema permitindo que o usuário monte seu inventário manualmente, visualize possibilidades de craft, acompanhe materiais faltantes e exporte ou importe os dados em JSON.
 
-Esta primeira versão utiliza dados mockados para validar a lógica principal do produto e preparar a base para futuras integrações com dados reais.
+A versão atual utiliza dados mockados para validar a lógica principal do produto, mas a arquitetura já começou a ser preparada para uma futura integração server-side com a Blizzard API.
 
 ## Funcionalidades
 
@@ -32,7 +32,7 @@ Esta primeira versão utiliza dados mockados para validar a lógica principal do
 * Edição de quantidade dos materiais.
 * Adição e remoção de reagentes.
 * Cálculo automático de receitas craftáveis.
-* Identificação de receitas quase craftáveis.
+* Identificação de receitas quase craftáveis e indisponíveis.
 * Exibição de materiais faltantes.
 * Progresso individual de cada reagente na receita.
 * Filtros por busca, status e profissão.
@@ -64,13 +64,19 @@ Esta primeira versão utiliza dados mockados para validar a lógica principal do
 * Filtros dinâmicos.
 * Rotas internas com Next.js.
 * Testes unitários com Vitest.
-* Regras de negócio aplicadas no frontend.
+* Services e adapters.
+* Configuração por variáveis de ambiente.
+* Preparação de integração server-side com API externa.
 * Organização de projeto com foco em escalabilidade.
 
 ## Estrutura do projeto
 
 ```txt
 src/
+├── adapters/
+│   ├── __tests__/
+│   │   └── blizzardRecipeAdapter.test.ts
+│   └── blizzardRecipeAdapter.ts
 ├── app/
 │   ├── api/
 │   │   └── crafting/
@@ -86,6 +92,9 @@ src/
 │   ├── RecipeCard.tsx
 │   ├── RecipeFilters.tsx
 │   └── RecipesResult.tsx
+├── config/
+│   ├── blizzardConfig.ts
+│   └── craftingDataSourceConfig.ts
 ├── data/
 │   └── mockCraftingData.ts
 ├── hooks/
@@ -97,11 +106,26 @@ src/
 │       │   └── calculateCraftOptions.test.ts
 │       └── calculateCraftOptions.ts
 ├── services/
+│   ├── blizzardApiService.ts
+│   ├── blizzardAuthService.ts
 │   ├── craftingApiClient.ts
 │   └── craftingDataService.ts
 └── types/
     └── crafting.ts
 ```
+
+## Documentação técnica
+
+O projeto possui documentação complementar para evolução da aplicação:
+
+```txt
+ROADMAP.md
+docs/BLIZZARD_API_PLAN.md
+.env.example
+vitest.config.ts
+```
+
+Esses arquivos registram o planejamento da evolução do projeto, a estratégia de integração com a Blizzard API, as variáveis de ambiente previstas e a configuração dos testes unitários.
 
 ## Como rodar localmente
 
@@ -134,6 +158,28 @@ Acesse no navegador:
 ```txt
 http://localhost:3000
 ```
+
+## Variáveis de ambiente
+
+O projeto possui um arquivo `.env.example` com as variáveis previstas para a futura integração com a Blizzard API.
+
+```env
+CRAFTING_DATA_SOURCE=mock
+
+BLIZZARD_CLIENT_ID=
+BLIZZARD_CLIENT_SECRET=
+BLIZZARD_REGION=us
+BLIZZARD_NAMESPACE=static-us
+BLIZZARD_LOCALE=pt_BR
+```
+
+A versão atual deve permanecer com:
+
+```env
+CRAFTING_DATA_SOURCE=mock
+```
+
+As credenciais reais não devem ser versionadas no GitHub.
 
 ## Scripts disponíveis
 
@@ -181,24 +227,33 @@ Quase craftável
 Indisponível
 ```
 
-## Dados mockados
+## Preparação para Blizzard API
 
-Esta versão utiliza dados fictícios para validar a lógica principal do produto.
+A aplicação ainda utiliza dados fictícios, mas já possui uma base inicial para futura integração com dados reais:
 
-A estrutura foi pensada para permitir uma evolução futura com dados reais vindos da Blizzard API ou de uma base própria de receitas.
+* configuração de variáveis de ambiente;
+* seletor de origem de dados;
+* rota interna para receitas;
+* service de autenticação da Blizzard;
+* service genérico para chamadas à Blizzard API;
+* adapter para converter receitas externas para o formato interno do app;
+* documentação técnica da estratégia de integração.
+
+A integração real ainda não está ativa na interface pública.
 
 ## Próximas melhorias
 
-* Integração com a Blizzard API.
-* Catálogo real de itens e receitas.
-* Login com Battle.net.
-* Importação de inventário via AddOn.
-* Consulta de valores da Auction House.
-* Sistema de favoritos para receitas.
-* Planejador de materiais faltantes.
+* Ativar integração real com a Blizzard API.
+* Mapear catálogo real de itens, receitas e profissões.
+* Exibir ícones dos itens.
+* Criar tela de catálogo de receitas.
+* Adicionar favoritos de receitas.
+* Criar planejador de materiais faltantes.
+* Estudar importação de inventário via AddOn.
+* Avaliar consulta de valores da Auction House.
 
 ## Status
 
 Projeto publicado e funcional como primeira versão de portfólio.
 
-A aplicação ainda utiliza dados fictícios, mas já possui a base de interface, regras de negócio, persistência local, rota interna, testes unitários e estrutura preparada para evoluções futuras.
+A aplicação já possui interface, regras de negócio, persistência local, rota interna, testes unitários, release publicada e uma base técnica inicial preparada para evoluções futuras com API externa.
