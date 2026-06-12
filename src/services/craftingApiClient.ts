@@ -2,6 +2,8 @@ import type { Recipe } from "@/types/crafting";
 
 type RecipesApiResponse = {
   recipes: Recipe[];
+  dataSource?: string;
+  error?: string;
 };
 
 function isValidRecipesResponse(value: unknown): value is RecipesApiResponse {
@@ -15,16 +17,16 @@ function isValidRecipesResponse(value: unknown): value is RecipesApiResponse {
 
 export async function fetchAvailableRecipes(): Promise<Recipe[]> {
   const response = await fetch("/api/crafting/recipes");
-
-  if (!response.ok) {
-    throw new Error("Não foi possível carregar as receitas disponíveis.");
-  }
-
   const data: unknown = await response.json();
 
-  // Valida o formato mínimo da resposta antes de entregar os dados para o hook.
   if (!isValidRecipesResponse(data)) {
     throw new Error("A resposta de receitas veio em um formato inesperado.");
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.error ?? "Não foi possível carregar as receitas disponíveis."
+    );
   }
 
   return data.recipes;
